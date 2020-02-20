@@ -4,7 +4,7 @@ metadata:
   creationTimestamp: 2020-02-13T09:22:31Z
   generation: 2
   labels:
-    prometheus: k8s
+    prometheus: k8s-mcm
   name: k8s-mcm
   namespace: openshift-monitoring
   resourceVersion: "17675"
