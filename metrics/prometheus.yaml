@@ -5,14 +5,14 @@ metadata:
   generation: 2
   labels:
     prometheus: k8s
-  name: k8s_mcm
+  name: k8s-mcm
   namespace: openshift-monitoring
   resourceVersion: "17675"
   selfLink: /apis/monitoring.coreos.com/v1/namespaces/openshift-monitoring/prometheuses/k8s
   uid: 80d8bcc5-d84d-4b4b-8ac6-7ab5bf851d99
 spec:
   remoteWrite:
-    url: 10.46.9.101:19291
+  - url: 10.46.9.101:19291
   affinity:
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
