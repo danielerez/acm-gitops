@@ -5,7 +5,7 @@ metadata:
   generation: 2
   labels:
     prometheus: k8s
-  name: k8s
+  name: k8s_mcm
   namespace: openshift-monitoring
   resourceVersion: "17675"
   selfLink: /apis/monitoring.coreos.com/v1/namespaces/openshift-monitoring/prometheuses/k8s
