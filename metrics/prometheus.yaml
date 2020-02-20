@@ -1,0 +1,187 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  creationTimestamp: 2020-02-13T09:22:31Z
+  generation: 2
+  labels:
+    prometheus: k8s
+  name: k8s
+  namespace: openshift-monitoring
+  resourceVersion: "17675"
+  selfLink: /apis/monitoring.coreos.com/v1/namespaces/openshift-monitoring/prometheuses/k8s
+  uid: 80d8bcc5-d84d-4b4b-8ac6-7ab5bf851d99
+spec:
+  remoteWrite:
+    url: 10.46.9.101:19291
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: prometheus
+              operator: In
+              values:
+              - k8s
+          namespaces:
+          - openshift-monitoring
+          topologyKey: kubernetes.io/hostname
+        weight: 100
+  alerting:
+    alertmanagers:
+    - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+      name: alertmanager-main
+      namespace: openshift-monitoring
+      port: web
+      scheme: https
+      tlsConfig:
+        ca: {}
+        caFile: /etc/prometheus/configmaps/serving-certs-ca-bundle/service-ca.crt
+        cert: {}
+        serverName: alertmanager-main.openshift-monitoring.svc
+  arbitraryFSAccessThroughSMs: {}
+  baseImage: openshift/prometheus
+  configMaps:
+  - serving-certs-ca-bundle
+  - kubelet-serving-ca-bundle
+  containers:
+  - args:
+    - -provider=openshift
+    - -https-address=:9091
+    - -http-address=
+    - -email-domain=*
+    - -upstream=http://localhost:9090
+    - -htpasswd-file=/etc/proxy/htpasswd/auth
+    - -openshift-service-account=prometheus-k8s
+    - '-openshift-sar={"resource": "namespaces", "verb": "get"}'
+    - '-openshift-delegate-urls={"/": {"resource": "namespaces", "verb": "get"}}'
+    - -tls-cert=/etc/tls/private/tls.crt
+    - -tls-key=/etc/tls/private/tls.key
+    - -client-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
+    - -cookie-secret-file=/etc/proxy/secrets/session_secret
+    - -openshift-ca=/etc/pki/tls/cert.pem
+    - -openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    - -skip-auth-regex=^/metrics
+    env:
+    - name: HTTP_PROXY
+    - name: HTTPS_PROXY
+    - name: NO_PROXY
+    image: quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:739eb3835380df3755b3f853efdf0c8a8a87f80af29886ca3296bdf62e3e8406
+    name: prometheus-proxy
+    ports:
+    - containerPort: 9091
+      name: web
+    resources:
+      requests:
+        cpu: 10m
+        memory: 20Mi
+    terminationMessagePolicy: FallbackToLogsOnError
+    volumeMounts:
+    - mountPath: /etc/tls/private
+      name: secret-prometheus-k8s-tls
+    - mountPath: /etc/proxy/secrets
+      name: secret-prometheus-k8s-proxy
+    - mountPath: /etc/proxy/htpasswd
+      name: secret-prometheus-k8s-htpasswd
+    - mountPath: /etc/pki/ca-trust/extracted/pem/
+      name: prometheus-trusted-ca-bundle
+      readOnly: true
+  - args:
+    - --secure-listen-address=0.0.0.0:9092
+    - --upstream=http://127.0.0.1:9095
+    - --config-file=/etc/kube-rbac-proxy/config.yaml
+    - --tls-cert-file=/etc/tls/private/tls.crt
+    - --tls-private-key-file=/etc/tls/private/tls.key
+    - --tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
+    - --logtostderr=true
+    - --v=10
+    image: quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:b32fbe4ffef894aef53eb8fff509c2bf1ec1347f1ae229fa95ae615a2e514a48
+    name: kube-rbac-proxy
+    ports:
+    - containerPort: 9092
+      name: tenancy
+    resources:
+      requests:
+        cpu: 10m
+        memory: 20Mi
+    terminationMessagePolicy: FallbackToLogsOnError
+    volumeMounts:
+    - mountPath: /etc/tls/private
+      name: secret-prometheus-k8s-tls
+    - mountPath: /etc/kube-rbac-proxy
+      name: secret-kube-rbac-proxy
+  - args:
+    - --insecure-listen-address=127.0.0.1:9095
+    - --upstream=http://127.0.0.1:9090
+    - --label=namespace
+    image: quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:3c4d18d53a9638cb1ea2bdfa3bc376be84e5abc19aa51ef9676e2d7bdd71ca37
+    name: prom-label-proxy
+    resources:
+      requests:
+        cpu: 10m
+        memory: 20Mi
+    terminationMessagePolicy: FallbackToLogsOnError
+  - args:
+    - sidecar
+    - --prometheus.url=http://localhost:9090/
+    - --tsdb.path=/prometheus
+    - --grpc-address=[$(POD_IP)]:10901
+    - --http-address=127.0.0.1:10902
+    - --grpc-server-tls-cert=/etc/tls/grpc/server.crt
+    - --grpc-server-tls-key=/etc/tls/grpc/server.key
+    - --grpc-server-tls-client-ca=/etc/tls/grpc/ca.crt
+    name: thanos-sidecar
+    resources: {}
+    volumeMounts:
+    - mountPath: /etc/tls/grpc
+      name: secret-grpc-tls
+  - name: prometheus
+    resources: {}
+    volumeMounts:
+    - mountPath: /etc/pki/ca-trust/extracted/pem/
+      name: prometheus-trusted-ca-bundle
+      readOnly: true
+  externalUrl: https://prometheus-k8s-openshift-monitoring.apps.titan91cluster.qe.lab.redhat.com/
+  image: quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:cb9a302063a7337b760cded364d372ee86ba0490febd4d2b52bc7599de5194d8
+  listenLocal: true
+  nodeSelector:
+    kubernetes.io/os: linux
+  podMonitorSelector: {}
+  priorityClassName: system-cluster-critical
+  replicas: 2
+  resources:
+    requests:
+      cpu: 200m
+      memory: 1Gi
+  retention: 15d
+  ruleNamespaceSelector: {}
+  ruleSelector: {}
+  rules:
+    alert: {}
+  secrets:
+  - kube-etcd-client-certs
+  - prometheus-k8s-tls
+  - prometheus-k8s-proxy
+  - prometheus-k8s-htpasswd
+  - kube-rbac-proxy
+  securityContext: {}
+  serviceAccountName: prometheus-k8s
+  serviceMonitorNamespaceSelector: {}
+  serviceMonitorSelector: {}
+  thanos:
+    baseImage: quay.io/openshift/origin-thanos
+    image: quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:687b3406ac521c875b2242296945634448c2ecd684e9ccf8b2d0c780a98b00b1
+    resources: {}
+    version: latest
+  version: v2.7.1
+  volumes:
+  - name: secret-grpc-tls
+    secret:
+      secretName: prometheus-k8s-grpc-tls-fa7m56981cuca
+  - configMap:
+      items:
+      - key: ca-bundle.crt
+        path: tls-ca-bundle.pem
+      name: prometheus-trusted-ca-bundle-39man1pbaa8jq
+      optional: true
+    name: prometheus-trusted-ca-bundle
