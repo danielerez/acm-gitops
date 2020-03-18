@@ -7,6 +7,10 @@ spec:
   - name: kind-cluster1
   resourceApplyMode: Upsert
   resources:
+  - apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: openshift-monitoring
   - kind: ConfigMap
     apiVersion: v1
     metadata:
