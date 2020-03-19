@@ -8,16 +8,33 @@ spec:
   resourceApplyMode: Upsert
   resources:
   - kind: Namespace
-    name: kubevirt
+    apiVersion: v1
+    metadata:
+      name: kubevirt
   - kind: CustomResourceDefinition
-    name: kubevirts.kubevirt.io
+    apiVersion: apiextensions.k8s.io/v1beta1
+    metadata:
+      name: kubevirts.kubevirt.io
   - kind: ClusterRole
-    name: kubevirt.io:operator
+    apiVersion: rbac.authorization.k8s.io/v1
+    metadata:
+      name: kubevirt.io:operator
   - kind: ClusterRole
-    name: kubevirt-operator
+    apiVersion: rbac.authorization.k8s.io/v1
+    metadata:
+      name: kubevirt-operator
   - kind: ClusterRoleBinding
-    name: kubevirt-operator
+    apiVersion: rbac.authorization.k8s.io/v1
+    metadata:
+      name: kubevirt-operator
+      namespace: kubevirt
   - kind: ServiceAccount
-    name: kubevirt-operator
+    apiVersion: v1
+    metadata:
+      name: kubevirt-operator
+      namespace: kubevirt
   - kind: Deployment
-    name: virt-operator
+    apiVersion: apps/v1
+    metadata:
+      name: virt-operator
+      namespace: kubevirt
