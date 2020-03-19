@@ -1,7 +1,7 @@
 apiVersion: hive.openshift.io/v1
 kind: SyncSet
 metadata:
-  name: mygroup
+  name: kni
 spec:
   clusterDeploymentRefs:
   - name: kind-cluster1
