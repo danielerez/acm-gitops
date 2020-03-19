@@ -1,0 +1,23 @@
+apiVersion: hive.openshift.io/v1
+kind: SyncSet
+metadata:
+  name: kubevirt
+spec:
+  clusterDeploymentRefs:
+  - name: kind-cluster1
+  resourceApplyMode: Upsert
+  resources:
+  - kind: Namespace
+    name: kubevirt
+  - kind: CustomResourceDefinition
+    name: kubevirts.kubevirt.io
+  - kind: ClusterRole
+    name: kubevirt.io:operator
+  - kind: ClusterRole
+    name: kubevirt-operator
+  - kind: ClusterRoleBinding
+    name: kubevirt-operator
+  - kind: ServiceAccount
+    name: kubevirt-operator
+  - kind: Deployment
+    name: virt-operator
