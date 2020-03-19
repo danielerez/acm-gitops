@@ -667,3 +667,10 @@ spec:
           securityContext:
             runAsNonRoot: true
           serviceAccountName: kubevirt-operator
+  - apiVersion: kubevirt.io/v1alpha3
+    kind: KubeVirt
+    metadata:
+      name: kubevirt
+      namespace: kubevirt
+    spec:
+      imagePullPolicy: IfNotPresent
