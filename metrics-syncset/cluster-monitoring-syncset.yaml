@@ -7,10 +7,6 @@ spec:
   - name: kind-cluster1
   resourceApplyMode: Upsert
   resources:
-  - kind: Namespace
-    apiVersion: v1
-    metadata:
-      name: default
   - kind: ConfigMap
     apiVersion: v1
     metadata:
