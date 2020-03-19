@@ -1,0 +1,14 @@
+apiVersion: performance.openshift.io/v1alpha1
+kind: PerformanceProfile
+metadata:
+  name: performance
+spec:
+  cpu:
+    isolated: "1-3"
+    reserved: "0"
+  hugepages:
+    defaultHugepagesSize: "1G"
+  realTimeKernel:
+    enabled: true
+  numa:
+    topologyPolicy: "best-effort"
