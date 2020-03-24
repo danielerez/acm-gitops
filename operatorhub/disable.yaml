@@ -3,4 +3,4 @@ kind: OperatorHub
 name: cluster
 patch: |-
   {"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}
-
+patchType: merge
