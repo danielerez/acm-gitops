@@ -2,5 +2,5 @@ apiVersion: config.openshift.io/v1
 kind: OperatorHub
 name: cluster
 patch: |-
-  {"disableAllDefaultSources": "true"}
+  {"spec": {"disableAllDefaultSources": "true"} }
 patchType: merge
