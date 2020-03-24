@@ -3,4 +3,4 @@ kind: OperatorHub
 name: cluster
 patch: |-
   {"disableAllDefaultSources": "true"}
-patchType: json
+patchType: merge
